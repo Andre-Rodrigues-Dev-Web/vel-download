@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Vel Download Bridge",
+  "description": "Extensão para integrar downloads do navegador com o Vel Download Desktop.",
+  "version": "1.0.0",
+  "permissions": [
+    "downloads",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:4000/*",
+    "http://localhost:4000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Vel Download",
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "vel-download-bridge@local.vel",
+      "strict_min_version": "121.0"
+    }
+  }
+}

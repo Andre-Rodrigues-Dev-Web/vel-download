@@ -243,6 +243,17 @@ function findByFilePath(filePath) {
   return mapRow(db.prepare("SELECT * FROM downloads WHERE file_path = ?").get(filePath));
 }
 
+function findBySourceReference(sourceReference) {
+  if (!sourceReference) {
+    return null;
+  }
+
+  const db = getDb();
+  return mapRow(
+    db.prepare("SELECT * FROM downloads WHERE source_reference = ? LIMIT 1").get(sourceReference)
+  );
+}
+
 function findExistingImported({ url, filePath, browserSource, fileName }) {
   const db = getDb();
   const row = db
@@ -280,6 +291,7 @@ module.exports = {
   logError,
   getDashboardStats,
   findByFilePath,
+  findBySourceReference,
   findExistingImported,
   listCategories
 };

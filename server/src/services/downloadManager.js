@@ -1,6 +1,8 @@
 const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
+const http = require("http");
+const https = require("https");
 const axios = require("axios");
 const { pipeline } = require("stream/promises");
 const downloadRepository = require("../repositories/downloadRepository");
@@ -29,10 +31,45 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function isTlsCertificateError(error) {
+  if (!error) {
+    return false;
+  }
+
+  const tlsCodes = new Set([
+    "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+    "SELF_SIGNED_CERT_IN_CHAIN",
+    "DEPTH_ZERO_SELF_SIGNED_CERT",
+    "CERT_HAS_EXPIRED",
+    "ERR_TLS_CERT_ALTNAME_INVALID"
+  ]);
+
+  if (tlsCodes.has(error.code)) {
+    return true;
+  }
+
+  const text = String(error.message || "").toLowerCase();
+  return text.includes("certificate") || text.includes("certificado");
+}
+
 class DownloadManager {
   constructor() {
     this.queue = [];
     this.activeTasks = new Map();
+    this.httpAgent = new http.Agent({
+      keepAlive: true,
+      maxSockets: 64
+    });
+    this.httpsAgent = new https.Agent({
+      keepAlive: true,
+      maxSockets: 64,
+      rejectUnauthorized: true
+    });
+    this.insecureHttpsAgent = new https.Agent({
+      keepAlive: true,
+      maxSockets: 64,
+      rejectUnauthorized: false
+    });
   }
 
   bootstrap() {
@@ -336,6 +373,45 @@ class DownloadManager {
     }
   }
 
+  async requestDownloadStream(url, headers, signal) {
+    const baseRequest = {
+      method: "GET",
+      url,
+      responseType: "stream",
+      timeout: appConfig.downloadTransferTimeoutMs > 0 ? appConfig.downloadTransferTimeoutMs : 0,
+      maxRedirects: 5,
+      signal,
+      headers,
+      httpAgent: this.httpAgent,
+      httpsAgent: this.httpsAgent,
+      validateStatus: (status) => (status >= 200 && status < 300) || status === 206
+    };
+
+    try {
+      return await axios(baseRequest);
+    } catch (error) {
+      const shouldFallback =
+        appConfig.allowInsecureTlsFallback &&
+        String(url || "").toLowerCase().startsWith("https://") &&
+        isTlsCertificateError(error);
+
+      if (!shouldFallback) {
+        throw error;
+      }
+
+      logger.warn("Fallback TLS inseguro ativado para download", {
+        url,
+        code: error.code,
+        message: error.message
+      });
+
+      return axios({
+        ...baseRequest,
+        httpsAgent: this.insecureHttpsAgent
+      });
+    }
+  }
+
   async startDownload(id) {
     const current = downloadRepository.getDownloadById(id);
 
@@ -382,16 +458,7 @@ class DownloadManager {
     this.broadcastDownloadUpdate(id);
 
     try {
-      const response = await axios({
-        method: "GET",
-        url: current.url,
-        responseType: "stream",
-        timeout: appConfig.requestTimeoutMs,
-        maxRedirects: 5,
-        signal: controller.signal,
-        headers,
-        validateStatus: (status) => (status >= 200 && status < 300) || status === 206
-      });
+      const response = await this.requestDownloadStream(current.url, headers, controller.signal);
 
       let resumable = false;
       let totalBytes = 0;
@@ -461,6 +528,12 @@ class DownloadManager {
       });
 
       await pipeline(response.data, writer);
+
+      if (totalBytes > 0 && downloadedBytes < totalBytes) {
+        throw new Error(
+          `Download incompleto (${downloadedBytes}/${totalBytes} bytes). Nova tentativa será aplicada.`
+        );
+      }
 
       downloadRepository.updateDownload(id, {
         status: "completed",

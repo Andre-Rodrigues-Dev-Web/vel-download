@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vel Download</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <h1>Vel Download</h1>
+        <span id="connection-badge" class="badge">Verificando...</span>
+      </header>
+
+      <form id="download-form" class="form">
+        <label>
+          URL
+          <input id="url" type="url" placeholder="https://servidor.com/arquivo.zip" required />
+        </label>
+
+        <label>
+          Nome do arquivo (opcional)
+          <input id="fileName" type="text" placeholder="arquivo.zip" />
+        </label>
+
+        <div class="grid-2">
+          <label>
+            Categoria
+            <input id="category" type="text" placeholder="Extensão" />
+          </label>
+
+          <label>
+            Prioridade
+            <select id="priority">
+              <option value="3">Baixa</option>
+              <option value="5" selected>Normal</option>
+              <option value="8">Alta</option>
+              <option value="10">Crítica</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="btn-app" type="button">Baixar no Vel Download</button>
+          <button id="btn-browser" type="button">Baixar no navegador + sincronizar</button>
+        </div>
+      </form>
+
+      <footer class="footer">
+        <button id="btn-options" type="button" class="link-button">Configurações da extensão</button>
+        <p id="status-message" class="status"></p>
+      </footer>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

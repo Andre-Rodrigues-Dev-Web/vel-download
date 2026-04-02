@@ -21,7 +21,10 @@ app.use(
       }
 
       const allowed =
-        origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:");
+        origin.startsWith("http://localhost:") ||
+        origin.startsWith("http://127.0.0.1:") ||
+        origin.startsWith("chrome-extension://") ||
+        origin.startsWith("moz-extension://");
 
       callback(allowed ? null : new Error("Origin não permitida"), allowed);
     },

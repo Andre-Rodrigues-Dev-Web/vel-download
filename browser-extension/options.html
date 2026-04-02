@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vel Download Bridge - Configurações</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Configurações da extensão</h1>
+
+      <section class="panel">
+        <label>
+          URL da API do aplicativo
+          <input id="appBaseUrl" type="text" placeholder="http://127.0.0.1:4000" />
+        </label>
+
+        <label>
+          Token compartilhado (opcional)
+          <input id="extensionToken" type="password" placeholder="EXTENSION_SHARED_TOKEN" />
+        </label>
+
+        <div class="grid-2">
+          <label>
+            Categoria padrão
+            <input id="defaultCategory" type="text" placeholder="Extensão" />
+          </label>
+
+          <label>
+            Prioridade padrão
+            <select id="defaultPriority">
+              <option value="3">Baixa</option>
+              <option value="5">Normal</option>
+              <option value="8">Alta</option>
+              <option value="10">Crítica</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="checkbox-row">
+          <input id="syncBrowserDownloads" type="checkbox" />
+          Sincronizar eventos de download do navegador automaticamente
+        </label>
+
+        <label class="checkbox-row">
+          <input id="notifyOnSyncError" type="checkbox" />
+          Mostrar notificação quando a sincronização falhar
+        </label>
+
+        <div class="actions">
+          <button id="btn-save" type="button">Salvar</button>
+          <button id="btn-test" type="button">Testar conexão</button>
+        </div>
+
+        <p id="status" class="status"></p>
+      </section>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>
