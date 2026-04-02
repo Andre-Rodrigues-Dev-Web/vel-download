@@ -1,0 +1,32 @@
+{
+  "name": "vel-download",
+  "version": "1.0.0",
+  "description": "Gerenciador de downloads desktop com Electron, React, Express e SQLite",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix electron install",
+    "db:init": "node database/init.js",
+    "dev:ui": "vite",
+    "dev:server": "npm --prefix server run dev",
+    "dev:electron": "npm --prefix electron run dev",
+    "dev": "concurrently -k -n UI,API,ELECTRON -c cyan,green,yellow \"npm run dev:ui\" \"npm run dev:server\" \"npm run dev:electron\"",
+    "start:server": "npm --prefix server run start",
+    "start:electron": "npm --prefix electron run start",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.3",
+    "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.2",
+    "concurrently": "^9.1.2",
+    "vite": "^7.1.2"
+  }
+}
